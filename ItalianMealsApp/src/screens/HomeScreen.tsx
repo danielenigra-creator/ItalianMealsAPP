@@ -1,4 +1,6 @@
 import React from "react";
+import { useEffect, useState } from "react";
+ 
 import {
   View,
   Text,
@@ -7,6 +9,7 @@ import {
   StyleSheet,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { fetchItalianMeals } from "../services/mealsApi";
 
 const DATA = [
   { id: "1", name: "Alpha" },
@@ -15,17 +18,26 @@ const DATA = [
 ];
 
 export default function HomeScreen({ navigation }: any) {
+    const [meals, setMeals] = useState([]);
+    async function loadMeals() {
+      const data=await fetchItalianMeals();
+      setMeals(data);
+      console.log(data);
+    }
+    useEffect(() => {
+      loadMeals();
+    }, []);
   return (
     <SafeAreaView style={styles.container}>
       <FlatList
-        data={DATA}
-        keyExtractor={(item) => item.id}
+        data={meals}
+        keyExtractor={(item) => item.mealId}
         renderItem={({ item }) => (
           <TouchableOpacity
             style={styles.item}
             onPress={() =>
               navigation.navigate("Details", {
-                id: item.id,
+                id: item.mealId,
               })
             }
           >

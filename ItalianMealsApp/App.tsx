@@ -1,20 +1,29 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { NavigationContainer } from "@react-navigation/native";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+
+import HomeScreen from "./src/screens/HomeScreen";
+import DetailsScreen from "./src/screens/DetailsScreen";
+import { useEffect, useState } from "react";
+import { fetchItalianMeals } from "./src/services/mealsApi";
+
+const Stack = createNativeStackNavigator();
 
 export default function App() {
+  const [meals, setMeals] = useState([]);
+  async function loadMeals() {
+    const data=await fetchItalianMeals();
+    setMeals(data);
+    console.log(data);
+  }
+  useEffect(() => {
+    loadMeals();
+  }, []);
   return (
-    <View style={styles.container}>
-      <Text>Open up App.tsx to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <NavigationContainer>
+      <Stack.Navigator>
+        <Stack.Screen name="Home" component={HomeScreen} />
+        <Stack.Screen name="Details" component={DetailsScreen} />
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
