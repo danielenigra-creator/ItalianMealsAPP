@@ -1,6 +1,6 @@
 import React from "react";
 import { useEffect, useState } from "react";
- 
+
 import {
   View,
   Text,
@@ -10,38 +10,39 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { fetchItalianMeals } from "../services/mealsApi";
+import Login from "./Login";
 
-const DATA = [
-  { id: "1", name: "Alpha" },
-  { id: "2", name: "Beta" },
-  { id: "3", name: "Gamma" },
-];
+interface Meal {
+  idMeal: string;
+  strMeal: string;
+  strMealThumb: string;
+}
 
 export default function HomeScreen({ navigation }: any) {
-    const [meals, setMeals] = useState([]);
-    async function loadMeals() {
-      const data=await fetchItalianMeals();
-      setMeals(data);
-      console.log(data);
-    }
-    useEffect(() => {
-      loadMeals();
-    }, []);
+  const [meals, setMeals] = useState<Meal[]>([]);
+  async function loadMeals() {
+    const data = await fetchItalianMeals();
+    setMeals(data);
+    // console.log(data);
+  }
+  useEffect(() => {
+    loadMeals();
+  }, []);
   return (
     <SafeAreaView style={styles.container}>
       <FlatList
         data={meals}
-        keyExtractor={(item) => item.mealId}
+        keyExtractor={(item) => item.idMeal}
         renderItem={({ item }) => (
           <TouchableOpacity
             style={styles.item}
             onPress={() =>
               navigation.navigate("Details", {
-                id: item.mealId,
+                id: item.idMeal,
               })
             }
           >
-            <Text style={styles.text}>{item.name}</Text>
+            <Text style={styles.text}>{item.strMeal}</Text>
           </TouchableOpacity>
         )}
       />
