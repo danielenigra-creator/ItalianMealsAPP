@@ -1,16 +1,9 @@
-import React from "react";
-import { useEffect, useState } from "react";
-
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  FlatList,
-  StyleSheet,
-} from "react-native";
+import React, { useEffect, useState } from "react";
+import { Text, TouchableOpacity, FlatList, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { fetchItalianMeals } from "../services/mealsApi";
-import Login from "./Login";
+import Avatar from "../components/Avatar";
+
 
 interface Meal {
   idMeal: string;
@@ -20,14 +13,20 @@ interface Meal {
 
 export default function HomeScreen({ navigation }: any) {
   const [meals, setMeals] = useState<Meal[]>([]);
+
   async function loadMeals() {
-    const data = await fetchItalianMeals();
-    setMeals(data);
-    // console.log(data);
+    try {
+      const data = await fetchItalianMeals();
+      setMeals(data);
+    } catch (error) {
+      console.error("Errore nel caricamento dei pasti:", error);
+    }
   }
+
   useEffect(() => {
     loadMeals();
   }, []);
+
   return (
     <SafeAreaView style={styles.container}>
       <FlatList
@@ -42,7 +41,9 @@ export default function HomeScreen({ navigation }: any) {
               })
             }
           >
+            <Avatar uri={item.strMealThumb} />
             <Text style={styles.text}>{item.strMeal}</Text>
+            <Text style={styles.idText}>ID: {item.idMeal}</Text>
           </TouchableOpacity>
         )}
       />
@@ -65,5 +66,11 @@ const styles = StyleSheet.create({
 
   text: {
     fontSize: 18,
+    fontWeight: "600",
+  },
+
+  idText: {
+    marginTop: 4,
+    color: "#666",
   },
 });

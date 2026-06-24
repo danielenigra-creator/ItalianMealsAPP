@@ -30,7 +30,7 @@ export function validateLogin(email: string, password: string) {
     (u) => u.email === email.trim() && u.password === password,
   );
 }
-export default function Login() {
+export default function LoginScreen({navigation}: any) {
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [status, setStatus] = React.useState("ready");
@@ -44,14 +44,17 @@ export default function Login() {
   React.useEffect(() => {
     console.log("APP STARTED");
   }, []);
-
   function handleClick() {
     setSubmitted(true);
 
-    if (allOk) {
-      setStatus("success");
+    const user = validateLogin(email, password);
+
+    if (user) {
+      navigation.navigate("Home");
+      console.log("Login successful for user:", user.name);
     } else {
       setStatus("error");
+      console.log("Login failed for email:", email);
     }
   }
 
