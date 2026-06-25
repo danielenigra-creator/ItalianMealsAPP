@@ -1,9 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Text, View, Image, Pressable, StyleSheet } from "react-native";
-import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 
 export default function Avatar({ uri }: { uri: string }) {
   const [error, setError] = useState(false);
+
+  useEffect(() => {
+    setError(false);
+  }, [uri]);
 
   function onAdd() {
     console.log("Pressed");
@@ -16,8 +19,11 @@ export default function Avatar({ uri }: { uri: string }) {
       {!error ? (
         <Image
           style={styles.image}
-          source={{ uri }}
-          onError={() => setError(true)}
+          source={{ uri: uri }}
+          onError={(e) => {
+            console.log("Image error:", e.nativeEvent);
+            setError(true);
+          }}
         />
       ) : (
         <View style={styles.fallback}>
@@ -25,13 +31,10 @@ export default function Avatar({ uri }: { uri: string }) {
         </View>
       )}
 
-      <Pressable onPress={onAdd} style={styles.button}>
-        <Text style={{ fontWeight: "600" }}>Tap</Text>
-      </Pressable>
+      
     </View>
   );
 }
-
 
 const styles = StyleSheet.create({
   headerStyle: {

@@ -1,68 +1,81 @@
-import React from "react";
-import { View, Text, Button, StyleSheet } from "react-native";
+import React, { useEffect, useState } from "react";
+import {
+  View,
+  Text,
+  Button,
+  StyleSheet,
+  Image,
+  ScrollView,
+  ActivityIndicator,
+} from "react-native";
 
-// services/auth.ts
-export const MOCK_USERS = [
-  {
-    email: "mario.rossi@student.it",
-    password: "React2026!",
-    name: "Mario Rossi",
-    avatarUri: "https://picsum.photos/seed/mario-rossi/128",
-  },
-  {
-    email: "giulia.bianchi@student.it",
-    password: "Expo2026!",
-    name: "Giulia Bianchi",
-    avatarUri: "https://picsum.photos/seed/giulia-bianchi/128",
-  },
-  {
-    email: "luca.verdi@student.it",
-    password: "Mobile2026!",
-    name: "Luca Verdi",
-    avatarUri: "https://picsum.photos/seed/luca-verdi/128",
-  },
-];
-
-export function validateLogin(email: string, password: string) {
-  return MOCK_USERS.find(
-    (u) => u.email === email.trim() && u.password === password,
-  );
+interface MealDetail {
+  idMeal: string;
+  strMeal: string;
+  strMealThumb: string;
+  strInstructions: string;
+  strCategory: string;
+  strArea: string;
 }
 
 export default function DetailsScreen({ navigation, route }: any) {
   const id = route.params?.id;
+  const [meal, setMeal] = useState<MealDetail | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // id mancante
+  async function loadMealDetail() {
+    try {
+      const response = await fetch(
+        `https://www.themealdb.com/api/json/v1/1/lookup.php?i=${id}`,
+      );
+      const json = await response.json();
+      setMeal(json.meals?.[0] || null);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    if (id) loadMealDetail();
+  }, [id]);
+
   if (!id) {
     return (
       <View style={styles.container}>
         <Text style={styles.error}>Invalid route param</Text>
-        <Button title="Go Back" onPress={() => navigation.goBack()} />
+        <Button title="Go Back" onPress={() => navigation.navigate("Login")} />
       </View>
     );
   }
 
-  const item = MOCK_USERS.find((p) => p.email === id);
-
-  // item non trovato
-  if (!item) {
+  if (isLoading) {
     return (
       <View style={styles.container}>
-        <Text style={styles.error}>User not found</Text>
-        <Button title="Go Back" onPress={() => navigation.goBack()} />
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
+
+  if (!meal) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.error}>Pasto non trovato</Text>
+        <Button title="Go Back" onPress={() => navigation.navigate("Login")} />
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Details Screen</Text>
-
-      <Text style={styles.text}>ID: {item.email }</Text>
-      <Text style={styles.text}>Name: {item.name}</Text>
-
-      <Button title="Go Back" onPress={() => navigation.goBack()} />
-    </View>
+    <ScrollView style={styles.container}>
+      <Image source={{ uri: meal.strMealThumb }} style={styles.image} />
+      <Text style={styles.title}>{meal.strMeal}</Text>
+      <Text style={styles.text}>Categoria: {meal.strCategory}</Text>
+      <Text style={styles.text}>Cucina: {meal.strArea}</Text>
+      <Text style={styles.instructions}>{meal.strInstructions}</Text>
+      <Button title="Go Back" onPress={() => navigation.navigate("Login")} />
+    </ScrollView>
   );
 }
 
@@ -70,18 +83,32 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    justifyContent: "center",
+  },
+
+  image: {
+    width: "100%",
+    height: 250,
+    borderRadius: 12,
+    marginBottom: 16,
   },
 
   title: {
     fontSize: 24,
     fontWeight: "bold",
-    marginBottom: 20,
+    marginBottom: 10,
   },
 
   text: {
-    fontSize: 18,
-    marginBottom: 10,
+    fontSize: 16,
+    marginBottom: 6,
+    color: "#444",
+  },
+
+  instructions: {
+    fontSize: 14,
+    marginTop: 10,
+    lineHeight: 22,
+    color: "#333",
   },
 
   error: {

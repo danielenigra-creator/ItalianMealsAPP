@@ -1,16 +1,18 @@
 import { NavigationContainer } from "@react-navigation/native";
 
-import HomeScreen from "./src/screens/HomeScreen";
+import HomeScreen from "./src/screens/MealsListScreen";
 import { useEffect, useState } from "react";
 import { fetchItalianMeals } from "./src/services/mealsApi";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
 import LoginScreen from "./src/screens/LoginScreen";
 import MealDetailScreen from "./src/screens/MealDetailScreen";
+import MealsListScreen from "./src/screens/MealsListScreen";
 
 const stack = createNativeStackNavigator();
 
 import * as Linking from "expo-linking";
+
 
 const linking = {
   prefixes: [Linking.createURL("/"), "myapp://"],
@@ -30,7 +32,7 @@ export default function App() {
     <NavigationContainer linking={linking}>
       <Stack.Navigator initialRouteName="Login">
         <Stack.Screen name="Login" component={LoginScreen} />
-        <Stack.Screen name="Home" component={HomeScreen} />
+        <Stack.Screen name="Home" component={MealsListScreen} />
         <Stack.Screen name="Details" component={MealDetailScreen} />
       </Stack.Navigator>
     </NavigationContainer>

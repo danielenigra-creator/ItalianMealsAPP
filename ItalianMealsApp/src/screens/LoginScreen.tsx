@@ -50,7 +50,7 @@ export default function LoginScreen({navigation}: any) {
     const user = validateLogin(email, password);
 
     if (user) {
-      navigation.navigate("Home");
+      navigation.navigate("Home", { user });
       console.log("Login successful for user:", user.name);
     } else {
       setStatus("error");
