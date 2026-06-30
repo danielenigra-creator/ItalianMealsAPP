@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from "react";
+import LoadingView from "../components/LoadingView";
+import ErrorView from "../components/ErrorView";
 import {
   View,
   Text,
@@ -6,7 +8,6 @@ import {
   StyleSheet,
   Image,
   ScrollView,
-  ActivityIndicator,
 } from "react-native";
 
 interface MealDetail {
@@ -19,26 +20,61 @@ interface MealDetail {
 }
 
 export default function DetailsScreen({ navigation, route }: any) {
-  const id = route.params?.id;
-  const [meal, setMeal] = useState<MealDetail | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const id = route.params?.idMeal;
+  console.log("PARAMS:", route.params);
+
+  const [state, setState] = useState({
+    status: "loading",
+    meal: null as MealDetail | null,
+    message: "",
+  });
 
   async function loadMealDetail() {
     try {
+      setState({
+        status: "loading",
+        meal: null,
+        message: "",
+      });
+
       const response = await fetch(
         `https://www.themealdb.com/api/json/v1/1/lookup.php?i=${id}`,
       );
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+
       const json = await response.json();
-      setMeal(json.meals?.[0] || null);
+      const meal = json.meals?.[0];
+
+      if (!meal) {
+        setState({
+          status: "error",
+          meal: null,
+          message: "Pasto non trovato",
+        });
+        return;
+      }
+
+      setState({
+        status: "success",
+        meal,
+        message: "",
+      });
     } catch (error) {
-      console.error(error);
-    } finally {
-      setIsLoading(false);
+      setState({
+        status: "error",
+        meal: null,
+        message: "Errore di rete",
+      });
     }
   }
 
   useEffect(() => {
-    if (id) loadMealDetail();
+    if (id) {
+      loadMealDetail();
+    }
   }, [id]);
 
   if (!id) {
@@ -50,30 +86,32 @@ export default function DetailsScreen({ navigation, route }: any) {
     );
   }
 
-  if (isLoading) {
-    return (
-      <View style={styles.container}>
-        <ActivityIndicator size="large" />
-      </View>
-    );
+  if (state.status === "loading") {
+    return <LoadingView />;
   }
 
-  if (!meal) {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.error}>Pasto non trovato</Text>
-        <Button title="Go Back" onPress={() => navigation.navigate("Login")} />
-      </View>
-    );
+  if (state.status === "error") {
+    return <ErrorView message={state.message} onRetry={loadMealDetail} />;
   }
+
+  if (!state.meal) {
+    return null;
+  }
+
+  const meal = state.meal;
 
   return (
     <ScrollView style={styles.container}>
       <Image source={{ uri: meal.strMealThumb }} style={styles.image} />
+
       <Text style={styles.title}>{meal.strMeal}</Text>
+
       <Text style={styles.text}>Categoria: {meal.strCategory}</Text>
+
       <Text style={styles.text}>Cucina: {meal.strArea}</Text>
+
       <Text style={styles.instructions}>{meal.strInstructions}</Text>
+
       <Button title="Go Back" onPress={() => navigation.navigate("Login")} />
     </ScrollView>
   );

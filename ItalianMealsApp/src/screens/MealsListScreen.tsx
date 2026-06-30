@@ -4,13 +4,12 @@ import {
   TouchableOpacity,
   FlatList,
   StyleSheet,
-  Button,
   View,
   Image,
+  ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { fetchItalianMeals } from "../services/mealsApi";
-import Avatar from "../components/Avatar";
 
 interface Meal {
   idMeal: string;
@@ -27,14 +26,21 @@ interface User {
 
 export default function MealsListScreen({ navigation, route }: any) {
   const [meals, setMeals] = useState<Meal[]>([]);
+  const [loading, setLoading] = useState(true);
+
   const user: User = route?.params?.user;
 
   async function loadMeals() {
     try {
+      await new Promise((res) => setTimeout(res, 1500));
+
+      setLoading(true);
       const data = await fetchItalianMeals();
       setMeals(data || []);
     } catch (error) {
-      console.error("Errore nel caricamento dei pasti:", error);
+      console.log(error);
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -42,16 +48,23 @@ export default function MealsListScreen({ navigation, route }: any) {
     loadMeals();
   }, []);
 
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" />
+        <Text>Caricamento piatti...</Text>
+      </View>
+    );
+  }
+
   return (
     <SafeAreaView style={styles.container}>
-      {/* Avatar rotondo + nome utente loggato */}
-      <Text style={styles.title}>Piatti Italiani </Text>
+      <Text style={styles.title}>Piatti Italiani</Text>
+
       <View style={styles.userHeader}>
         <Image source={{ uri: user?.avatarUri }} style={styles.avatar} />
         <Text style={styles.userName}>{user?.name ?? "Utente"}</Text>
       </View>
-
-      <Button title="Go Back" onPress={() => navigation.navigate("Login")} />
 
       <FlatList
         data={meals}
@@ -61,11 +74,11 @@ export default function MealsListScreen({ navigation, route }: any) {
             style={styles.item}
             onPress={() =>
               navigation.navigate("Details", {
-                id: item.idMeal,
+                idMeal: item.idMeal,
               })
             }
           >
-            <Avatar uri={item.strMealThumb} />
+            <Image source={{ uri: item.strMealThumb }} style={styles.img} />
             <Text style={styles.text}>{item.strMeal}</Text>
             <Text style={styles.idText}>ID: {item.idMeal}</Text>
           </TouchableOpacity>
@@ -76,9 +89,19 @@ export default function MealsListScreen({ navigation, route }: any) {
 }
 
 const styles = StyleSheet.create({
-  container: {
+  container: { flex: 1, padding: 16 },
+
+  loadingBox: {
     flex: 1,
-    padding: 16,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    textAlign: "center",
+    marginBottom: 10,
   },
 
   userHeader: {
@@ -88,43 +111,25 @@ const styles = StyleSheet.create({
     gap: 12,
   },
 
-  avatar: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-  },
+  avatar: { width: 48, height: 48, borderRadius: 24 },
 
-  userName: {
-    fontSize: 18,
-    fontWeight: "600",
-  },
+  userName: { fontSize: 18, fontWeight: "600" },
 
   item: {
-    padding: 16,
+    padding: 12,
     marginBottom: 10,
     backgroundColor: "#eee",
-    borderRadius: 28,
+    borderRadius: 12,
   },
 
-  text: {
-    fontSize: 18,
-    fontWeight: "600",
+  img: {
+    width: "100%",
+    height: 150,
+    borderRadius: 10,
+    marginBottom: 8,
   },
 
-  idText: {
-    marginTop: 4,
-    color: "#666",
-  },
+  text: { fontSize: 18, fontWeight: "600" },
 
-  error: {
-    fontSize: 18,
-    marginBottom: 20,
-    color: "red",
-  },
-  title:{
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 10,
-    textAlign: "center",
-  }
+  idText: { color: "#666" },
 });
