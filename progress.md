@@ -18,11 +18,18 @@ Continuato il lavoro su MealDetailsScreen e MealListScreen.
 Implementato l'avatar con l'immagine e nome utente.
 In details posso vedere i dettagli del piatto preso da API.
 
+# Martedì 30 Giungo
+
+Oggi ho sistemato il Login , ho simulato su LoadingView il caricamento della pagina e della API.
+Ho sistemato gli utenti, inserento i dati su auth.ts.
+MealCard ho sistemato il funzionamento.
+
+
 # Progress - Italian Meals App
 
 **Studente:** Daniele Nigra-Gattinotta 
 **Repo:** https://github.com/danielenigra-creator/ItalianMealsAPP.git
-**Ultimo aggiornamento:** 2026-06-25
+**Ultimo aggiornamento:** 2026-06-30
 
 ## Schermate implementate
 
