@@ -7,6 +7,8 @@ import {
   View,
   Image,
   ActivityIndicator,
+  TextInput,
+  Button,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { fetchItalianMeals } from "../services/mealsApi";
@@ -27,6 +29,7 @@ interface User {
 export default function MealsListScreen({ navigation, route }: any) {
   const [meals, setMeals] = useState<Meal[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchInput, setSearchInput] = useState("");
 
   const user: User = route?.params?.user;
 
@@ -45,9 +48,16 @@ export default function MealsListScreen({ navigation, route }: any) {
   }
 
   useEffect(() => {
-    loadMeals();
-  }, []);
+    const timer = setTimeout(() => {
+      if (searchInput.trim() === "") {
+        loadMeals();
+      } else {
+        searchMeals(searchInput);
+      }
+    }, 1000); // aspetta 1000 ms
 
+    return () => clearTimeout(timer);
+  }, [searchInput]);
   if (loading) {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
@@ -57,6 +67,20 @@ export default function MealsListScreen({ navigation, route }: any) {
     );
   }
 
+  async function searchMeals(name: string) {
+    try {
+      setLoading(true);
+
+      const response = await fetch(
+        `https://www.themealdb.com/api/json/v1/1/search.php?s=${name}`,
+      );
+
+      const json = await response.json();
+      setMeals(json.meals ?? []);
+    } finally {
+      setLoading(false);
+    }
+  }
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.title}>Piatti Italiani</Text>
@@ -65,7 +89,13 @@ export default function MealsListScreen({ navigation, route }: any) {
         <Image source={{ uri: user?.avatarUri }} style={styles.avatar} />
         <Text style={styles.userName}>{user?.name ?? "Utente"}</Text>
       </View>
-
+      <TextInput
+        style={styles.textInput}
+        value={searchInput}
+        onChangeText={setSearchInput}
+        placeholder="Cerca un piatto..."
+      />
+      {/* <Button title="Cerca" onPress={() => searchMeals(searchInput)} /> */}
       <FlatList
         data={meals}
         keyExtractor={(item) => item.idMeal}
@@ -132,4 +162,13 @@ const styles = StyleSheet.create({
   text: { fontSize: 18, fontWeight: "600" },
 
   idText: { color: "#666" },
+
+  textInput: {
+    height: 40,
+    borderColor: "gray",
+    borderWidth: 1,
+    borderRadius: 8,
+    padding: 8,
+    marginBottom: 16,
+  },
 });

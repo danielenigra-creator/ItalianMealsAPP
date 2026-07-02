@@ -81,7 +81,7 @@ export default function DetailsScreen({ navigation, route }: any) {
     return (
       <View style={styles.container}>
         <Text style={styles.error}>Invalid route param</Text>
-        <Button title="Go Back" onPress={() => navigation.navigate("Login")} />
+        <Button title="Go Back" onPress={() => navigation.goBack()} />
       </View>
     );
   }
@@ -112,7 +112,7 @@ export default function DetailsScreen({ navigation, route }: any) {
 
       <Text style={styles.instructions}>{meal.strInstructions}</Text>
 
-      <Button title="Go Back" onPress={() => navigation.navigate("Login")} />
+      <Button title="Go Back" onPress={() => navigation.goBack()} />
     </ScrollView>
   );
 }
